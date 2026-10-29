@@ -103,8 +103,7 @@ def create(uid,count,existing=None):
         if total>bal:return send(uid,f"Недостаточно DEMO USDT. Нужно {fmt(total)}, доступно {fmt(bal)}.")
         code=secrets.token_urlsafe(14)
         c.execute("UPDATE users SET balance=balance-%s WHERE id=%s",(total,uid))
-        c.execute("INSERT INTO checks(code,owner,amount,max_claims) VALUES(%s,%s,%s,%s) RETURNING id",(code,uid,amount,count))
-        cid=c.fetchone()["id"]
+        cid=c.execute("INSERT INTO checks(code,owner,amount,max_claims) VALUES(%s,%s,%s,%s) RETURNING id",(code,uid,amount,count)).fetchone()["id"]
         c.execute("DELETE FROM state WHERE id=%s",(uid,))
     bot=api("getMe")
     username=((bot or {}).get("result") or {}).get("username")
