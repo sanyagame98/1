@@ -146,7 +146,7 @@ def callback(q):
 def health():return jsonify({"status":"ok","mode":"demo","configured":bool(TOKEN and DB)})
 @app.post("/telegram")
 def telegram():
-    if not TOKEN or request.headers.get("X-Telegram-Bot-Api-Secret-Token")!=os.getenv("WEBHOOK_SECRET",""):return ("Forbidden",403)
+    if not TOKEN or not os.getenv("WEBHOOK_SECRET") or request.headers.get("X-Telegram-Bot-Api-Secret-Token")!=os.getenv("WEBHOOK_SECRET"):return ("Forbidden",403)
     try:
         up=request.get_json(force=True) or {}
         if "message" in up:msg(up["message"])
@@ -156,5 +156,5 @@ def telegram():
 if DB:
     try:init()
     except Exception:logging.exception("Database initialization failed")
-if TOKEN and BASE and DB:
-    api("setWebhook",url=BASE+"/telegram",secret_token=os.getenv("WEBHOOK_SECRET",""),allowed_updates=["message","callback_query"])
+if TOKEN and BASE and DB and os.getenv("WEBHOOK_SECRET"):
+    api("setWebhook",url=BASE+"/telegram",secret_token=os.environ["WEBHOOK_SECRET"],allowed_updates=["message","callback_query"])
